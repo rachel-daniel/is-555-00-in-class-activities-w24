@@ -3,20 +3,41 @@ df <- starwars
 
 
 # Grouping ----------------------------------------------------------------
-
+df %>% 
+  group_by(species) %>% 
+  summarize(species_count = n())
 
 # top 5 tallest overall - using slice_head
 df %>% 
   arrange(desc(height)) %>% 
   slice_head(n = 5)
 
+# get a specific row in the df
+df %>% slice(5)
 
+# get the top n number of rows
+df %>% 
+  arrange(mass) %>% 
+  slice_head(n=2)
+
+# get the row with the lowest value in mass
+df %>% 
+  slice_min(mass)
+
+# get a random sample of 10% of the data from the df
+df %>% 
+  slice_sample(prop = 0.1)
 
 # or just using slice_max
 df %>% 
   slice_max(mass, n = 5)
 
-# what is the shortest character for each species? 
+# slice works on categorical variables too
+# ties can occur when there are multiple rows returned that fit the slice criteria
+df %>% 
+  slice_min(skin_color, n=1, with_ties = F)
+
+# what is the tallest character for each species? 
 df %>% 
   group_by(species) %>% 
   slice_max(height)
@@ -50,10 +71,16 @@ df %>%
   summarize(count = n(),
             avg_birth_year = mean(birth_year, na.rm = T))
 
+# get the lighest character from each species, then get avg height by gender
+df %>% 
+  group_by(species) %>% 
+  slice_min(mass, n = 1, with_ties = F) %>% 
+  group_by(sex) %>% 
+  summarize(avg_height = mean(height, na.rm = 1))
 
 # Joins -------------------------------------------------------------------
 
-# install.packages('nycflights13')
+#install.packages('nycflights13')
 library(nycflights13)
 df_flights <- flights
 df_airlines <- airlines
@@ -72,6 +99,8 @@ flights2 %>%
 flights2 %>% 
   left_join(df_airlines)
 
+# if you don't specify a column to join on, the tidyverse can figure it out
+# but it's so much better to specify!
 left_join(flights2, df_airlines)
 
 # Just an example for when the keys aren't identical:
